@@ -1,9 +1,3 @@
-<?php
-// index.php
-require_once 'config/database.php';
-session_start();
-
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,10 +5,15 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUTRIPRO - Suplementos Deportivos Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/products.css">
 </head>
 <body>
-    <header>
+    <!-- Overlay para el carrito y menú móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
         <div class="top-bar">
             <div class="container">
                 <div class="contact-info">
@@ -28,146 +27,209 @@ session_start();
                 </div>
             </div>
         </div>
-        
+
         <nav class="main-nav">
             <div class="container">
                 <div class="logo">
-                    <img src="assets/images/logo.png" alt="NUTRIPRO">
+                    <h1>NUTRIPRO</h1>
                 </div>
-                <div class="search-bar">
-                    <form action="search.php" method="GET">
-                        <input type="text" name="q" placeholder="Buscar productos...">
-                        <button type="submit"><i class="fas fa-search"></i></button>
-                    </form>
+                
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Buscar productos...">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
                 </div>
-                <div class="nav-links">
-                    <a href="cart.php" class="cart-icon">
+
+                <div class="nav-buttons">
+                    <button class="cart-btn" id="cartBtn">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count">0</span>
-                    </a>
-                    <a href="account.php" class="account-icon">
-                        <i class="fas fa-user"></i>
-                    </a>
+                    </button>
+                    <button class="menu-btn" id="menuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
             </div>
         </nav>
-        
-        <nav class="category-nav">
+
+        <!-- Menú de categorías -->
+        <nav class="category-nav" id="categoryNav">
             <div class="container">
-                <ul>
-                    <?php
-                    // Obtener categorías de la base de datos
-                    $categories = $db->query("SELECT * FROM categories");
-                    while($cat = $categories->fetch_assoc()):
-                    ?>
-                    <li>
-                        <a href="category.php?slug=<?php echo $cat['slug']; ?>">
-                            <?php echo $cat['name']; ?>
-                        </a>
-                    </li>
-                    <?php endwhile; ?>
+                <ul class="category-list">
+                    <li><a href="#" data-category="proteinas">Proteínas</a></li>
+                    <li><a href="#" data-category="termogenicos">Termogénicos</a></li>
+                    <li><a href="#" data-category="creatinas">Creatinas</a></li>
+                    <li><a href="#" data-category="ganadores">Ganadores de Peso</a></li>
+                    <li><a href="#" data-category="esenciales">Esenciales</a></li>
+                    <li><a href="#" data-category="pre-entreno">Pre-entreno</a></li>
+                    <li><a href="#" data-category="veganos">Productos Veganos</a></li>
+                    <li><a href="#" data-category="snacks">Snacks Saludables</a></li>
+                    <li><a href="#" data-category="energeticos">Energéticos</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
+    <!-- Contenido Principal -->
     <main>
-        <!-- Hero Section -->
+        <!-- Hero Section con Slider -->
         <section class="hero-slider">
             <div class="slider-container">
-                <div class="slide">
-                    <img src="assets/images/hero1.jpg" alt="Suplementos Premium">
+                <div class="slide active">
+                    <img src="/api/placeholder/1920/800" alt="Suplementos Premium">
                     <div class="slide-content">
-                        <h1>Potencia tu rendimiento</h1>
+                        <h2>Potencia tu rendimiento</h2>
                         <p>Descubre nuestra línea premium de suplementos deportivos</p>
-                        <a href="category.php?slug=proteinas" class="cta-button">Ver Productos</a>
+                        <a href="#products" class="cta-button">Ver Productos</a>
                     </div>
                 </div>
-                <!-- Más slides aquí -->
+                <div class="slide">
+                    <img src="/api/placeholder/1920/800" alt="Proteínas Premium">
+                    <div class="slide-content">
+                        <h2>Proteínas de Alta Calidad</h2>
+                        <p>Las mejores marcas al mejor precio</p>
+                        <a href="#proteinas" class="cta-button">Explorar</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="/api/placeholder/1920/800" alt="Productos Veganos">
+                    <div class="slide-content">
+                        <h2>Línea Vegana</h2>
+                        <p>Suplementos 100% vegetales</p>
+                        <a href="#veganos" class="cta-button">Descubrir</a>
+                    </div>
+                </div>
             </div>
+            <button class="slider-btn prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-btn next"><i class="fas fa-chevron-right"></i></button>
         </section>
 
-        <!-- Featured Categories -->
+        <!-- Sección de Categorías Destacadas -->
         <section class="featured-categories">
             <div class="container">
                 <h2>Categorías Destacadas</h2>
                 <div class="category-grid">
-                    <?php
-                    $featured_cats = $db->query("SELECT * FROM categories LIMIT 6");
-                    while($cat = $featured_cats->fetch_assoc()):
-                    ?>
                     <div class="category-card">
-                        <img src="assets/images/categories/<?php echo $cat['image']; ?>" alt="<?php echo $cat['name']; ?>">
-                        <h3><?php echo $cat['name']; ?></h3>
-                        <a href="category.php?slug=<?php echo $cat['slug']; ?>" class="category-link">Ver Productos</a>
+                        <img src="/api/placeholder/400/400" alt="Proteínas">
+                        <h3>Proteínas</h3>
+                        <a href="#proteinas">Ver Productos</a>
                     </div>
-                    <?php endwhile; ?>
+                    <div class="category-card">
+                        <img src="/api/placeholder/400/400" alt="Creatinas">
+                        <h3>Creatinas</h3>
+                        <a href="#creatinas">Ver Productos</a>
+                    </div>
+                    <div class="category-card">
+                        <img src="/api/placeholder/400/400" alt="Pre-entreno">
+                        <h3>Pre-entreno</h3>
+                        <a href="#pre-entreno">Ver Productos</a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Featured Products -->
-        <section class="featured-products">
+        <!-- Sección de Productos -->
+        <section class="products-section" id="products">
             <div class="container">
-                <h2>Productos Destacados</h2>
-                <div class="product-grid">
-                    <?php
-                    $featured_products = $db->query("SELECT * FROM products ORDER BY RAND() LIMIT 8");
-                    while($prod = $featured_products->fetch_assoc()):
-                        $variant = $db->query("SELECT * FROM product_variants WHERE product_id = {$prod['id']} LIMIT 1")->fetch_assoc();
-                    ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="assets/images/products/<?php echo $prod['main_image']; ?>" alt="<?php echo $prod['name']; ?>">
-                            <div class="quick-view">
-                                <button onclick="showQuickView(<?php echo $prod['id']; ?>)">Vista Rápida</button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3><?php echo $prod['name']; ?></h3>
-                            <p class="price">Desde $<?php echo number_format($variant['price'], 2); ?></p>
-                            <a href="product.php?slug=<?php echo $prod['slug']; ?>" class="view-product">Ver Detalles</a>
-                        </div>
-                    </div>
-                    <?php endwhile; ?>
+                <h2>Nuestros Productos</h2>
+                <div class="filters">
+                    <select id="categoryFilter">
+                        <option value="">Todas las categorías</option>
+                        <option value="proteinas">Proteínas</option>
+                        <option value="termogenicos">Termogénicos</option>
+                        <option value="creatinas">Creatinas</option>
+                        <option value="ganadores">Ganadores de Peso</option>
+                        <option value="esenciales">Esenciales</option>
+                        <option value="pre-entreno">Pre-entreno</option>
+                        <option value="veganos">Productos Veganos</option>
+                        <option value="snacks">Snacks Saludables</option>
+                        <option value="energeticos">Energéticos</option>
+                    </select>
+                    <select id="priceFilter">
+                        <option value="">Ordenar por precio</option>
+                        <option value="low-high">Menor a mayor</option>
+                        <option value="high-low">Mayor a menor</option>
+                    </select>
+                </div>
+                <div class="products-grid" id="productsGrid">
+                    <!-- Los productos se cargarán dinámicamente aquí -->
                 </div>
             </div>
         </section>
     </main>
 
-    <footer>
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            <div class="footer-grid">
+            <div class="footer-content">
                 <div class="footer-section">
-                    <h4>Sobre NUTRIPRO</h4>
+                    <h3>NUTRIPRO</h3>
                     <p>Tu tienda de confianza en suplementos deportivos de alta calidad.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
                 </div>
                 <div class="footer-section">
-                    <h4>Enlaces Rápidos</h4>
+                    <h3>Enlaces Rápidos</h3>
                     <ul>
-                        <li><a href="about.php">Sobre Nosotros</a></li>
-                        <li><a href="contact.php">Contacto</a></li>
-                        <li><a href="shipping.php">Envíos</a></li>
-                        <li><a href="privacy.php">Privacidad</a></li>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#">Productos</a></li>
+                        <li><a href="#">Sobre Nosotros</a></li>
+                        <li><a href="#">Contacto</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Contacto</h4>
-                    <p>Email: info@nutripro.com</p>
-                    <p>Tel: +1234567890</p>
-                    <p>Dirección: Calle Principal #123</p>
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-phone"></i> +1234567890</p>
+                    <p><i class="fas fa-envelope"></i> info@nutripro.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Calle Principal #123</p>
                 </div>
                 <div class="footer-section">
-                    <h4>Newsletter</h4>
+                    <h3>Newsletter</h3>
                     <form class="newsletter-form">
                         <input type="email" placeholder="Tu email">
                         <button type="submit">Suscribirse</button>
                     </form>
                 </div>
             </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NUTRIPRO. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 
-    <script src="assets/js/main.js"></script>
+    <!-- Modal de Producto -->
+    <div class="product-modal" id="productModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div class="modal-body">
+                <!-- Contenido del producto se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrito lateral -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Carrito de Compras</h3>
+            <button class="close-cart">&times;</button>
+        </div>
+        <div class="cart-items">
+            <!-- Items del carrito se cargarán dinámicamente -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn">Proceder al Pago</button>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
