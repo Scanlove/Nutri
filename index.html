@@ -1,0 +1,173 @@
+<?php
+// index.php
+require_once 'config/database.php';
+session_start();
+
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUTRIPRO - Suplementos Deportivos Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="top-bar">
+            <div class="container">
+                <div class="contact-info">
+                    <span><i class="fas fa-phone"></i> +1234567890</span>
+                    <span><i class="fas fa-envelope"></i> info@nutripro.com</span>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <div class="container">
+                <div class="logo">
+                    <img src="assets/images/logo.png" alt="NUTRIPRO">
+                </div>
+                <div class="search-bar">
+                    <form action="search.php" method="GET">
+                        <input type="text" name="q" placeholder="Buscar productos...">
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="nav-links">
+                    <a href="cart.php" class="cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                    <a href="account.php" class="account-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        <nav class="category-nav">
+            <div class="container">
+                <ul>
+                    <?php
+                    // Obtener categorías de la base de datos
+                    $categories = $db->query("SELECT * FROM categories");
+                    while($cat = $categories->fetch_assoc()):
+                    ?>
+                    <li>
+                        <a href="category.php?slug=<?php echo $cat['slug']; ?>">
+                            <?php echo $cat['name']; ?>
+                        </a>
+                    </li>
+                    <?php endwhile; ?>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-slider">
+            <div class="slider-container">
+                <div class="slide">
+                    <img src="assets/images/hero1.jpg" alt="Suplementos Premium">
+                    <div class="slide-content">
+                        <h1>Potencia tu rendimiento</h1>
+                        <p>Descubre nuestra línea premium de suplementos deportivos</p>
+                        <a href="category.php?slug=proteinas" class="cta-button">Ver Productos</a>
+                    </div>
+                </div>
+                <!-- Más slides aquí -->
+            </div>
+        </section>
+
+        <!-- Featured Categories -->
+        <section class="featured-categories">
+            <div class="container">
+                <h2>Categorías Destacadas</h2>
+                <div class="category-grid">
+                    <?php
+                    $featured_cats = $db->query("SELECT * FROM categories LIMIT 6");
+                    while($cat = $featured_cats->fetch_assoc()):
+                    ?>
+                    <div class="category-card">
+                        <img src="assets/images/categories/<?php echo $cat['image']; ?>" alt="<?php echo $cat['name']; ?>">
+                        <h3><?php echo $cat['name']; ?></h3>
+                        <a href="category.php?slug=<?php echo $cat['slug']; ?>" class="category-link">Ver Productos</a>
+                    </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section class="featured-products">
+            <div class="container">
+                <h2>Productos Destacados</h2>
+                <div class="product-grid">
+                    <?php
+                    $featured_products = $db->query("SELECT * FROM products ORDER BY RAND() LIMIT 8");
+                    while($prod = $featured_products->fetch_assoc()):
+                        $variant = $db->query("SELECT * FROM product_variants WHERE product_id = {$prod['id']} LIMIT 1")->fetch_assoc();
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="assets/images/products/<?php echo $prod['main_image']; ?>" alt="<?php echo $prod['name']; ?>">
+                            <div class="quick-view">
+                                <button onclick="showQuickView(<?php echo $prod['id']; ?>)">Vista Rápida</button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3><?php echo $prod['name']; ?></h3>
+                            <p class="price">Desde $<?php echo number_format($variant['price'], 2); ?></p>
+                            <a href="product.php?slug=<?php echo $prod['slug']; ?>" class="view-product">Ver Detalles</a>
+                        </div>
+                    </div>
+                    <?php endwhile; ?>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Sobre NUTRIPRO</h4>
+                    <p>Tu tienda de confianza en suplementos deportivos de alta calidad.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces Rápidos</h4>
+                    <ul>
+                        <li><a href="about.php">Sobre Nosotros</a></li>
+                        <li><a href="contact.php">Contacto</a></li>
+                        <li><a href="shipping.php">Envíos</a></li>
+                        <li><a href="privacy.php">Privacidad</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p>Email: info@nutripro.com</p>
+                    <p>Tel: +1234567890</p>
+                    <p>Dirección: Calle Principal #123</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Tu email">
+                        <button type="submit">Suscribirse</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
